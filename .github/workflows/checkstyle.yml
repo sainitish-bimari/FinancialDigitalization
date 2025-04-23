@@ -1,0 +1,36 @@
+name: Java Code Quality Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  code-linting:
+    name: Execute Checkstyle Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Source Checkout
+        uses: actions/checkout@v3
+
+      - name: Initialize Java Environment
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Retrieve Checkstyle Tool & Configuration
+        run: |
+          curl -sSL -o checkstyle-tool.jar https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.14.0/checkstyle-10.14.0-all.jar
+          curl -sSL -o google-style.xml https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml
+
+      - name: Perform Static Code Analysis
+        run: |
+          echo "Linting all Java files recursively..."
+          java -jar checkstyle-tool.jar -c google-style.xml $(find . -type f -name "*.java")
+
